@@ -1,3 +1,6 @@
+class UnitTypeException(Exception):
+    pass
+
 class UnitManagementException(Exception):
     pass
 

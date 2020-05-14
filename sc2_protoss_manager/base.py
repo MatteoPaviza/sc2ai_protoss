@@ -8,9 +8,10 @@ from sc2.units import Units
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 
-from data.libs.exceptions.unit_management_exceptions import WorkerManagementException
+from sc2_protoss_manager.exceptions.unit_management_exceptions import WorkerManagementException, UnitTypeException
 
 class Base:
+
     def __init__(self, nexus: Unit, bot_object: BotAI):
         self._bot_object: BotAI = bot_object
         self.position: Point2 = nexus.position
@@ -21,31 +22,42 @@ class Base:
         self.assimilators: Units = Units([], bot_object)
         self.pylons: Units = Units([], bot_object)
         self.structures: Units = Units([], bot_object)
-        self.base_orders = []
+        # TODO self.base_orders = []
 
-    @property
-    def is_alive(self) -> bool:
-        return not self.nexus in self._bot_object.townhalls
-
-    def update_collections(self):
-        self.workers = self.workers.filter(lambda w: w in self._bot_object.workers)
-        self.mineral_nodes = self.mineral_nodes.filter(lambda m: m in self._bot_object.mineral_field)
-        self.vespene_nodes = self.vespene_nodes.filter(lambda v: v in self._bot_object.vespene_geyser)
-        self.assimilators = self.assimilators.filter(lambda a: a in self._bot_object.gas_buildings)
-        self.pylons = self.pylons.filter(lambda p: p in self._bot_object.structures(UnitTypeId.PYLON))
-        self.structures = self.structures.filter(lambda s: s in self._bot_object.structures(s.type_id))
+    def __repr__(self):
+        workers_str = f"{self.workers.amount}"
+        ideal_workers_str = f"{self.nexus.ideal_harvesters}"
+        workers_over_ideal_workers_pct = round((self.workers.amount / self.nexus.ideal_harvesters) * 100, 1)
+        workers_over_ideal_workers_pct_str = f"{workers_over_ideal_workers_pct}"
+        if self.workers.amount < 10:
+            workers_str = "0" + workers_str
+        if self.nexus.ideal_harvesters < 10:
+            ideal_workers_str = "0" + ideal_workers_str
+        if workers_over_ideal_workers_pct < 100:
+            workers_over_ideal_workers_pct_str = " " + workers_over_ideal_workers_pct_str
+            if workers_over_ideal_workers_pct < 10:
+                workers_over_ideal_workers_pct_str = " " + workers_over_ideal_workers_pct_str
+        return f"W[{workers_str}/{ideal_workers_str}|{workers_over_ideal_workers_pct_str}%] P[{self.pylons.amount}]"
 
     # Add workers to the base
     def add_worker(self, new_worker: Unit):
-        self.add_workers(Units([new_worker], new_worker._bot_object))
+        self.add_workers(Units([new_worker], self._bot_object))
     def add_workers(self, new_workers: Units):
         try:
+            # Only add the units to the workers list if all of them are workers and aren't already in the list
             if new_workers.amount == new_workers(UnitTypeId.PROBE).amount:
-                self.workers.extend(new_workers)
+                # Only add the units to the workers list if none them already is in the list
+                if new_workers.filter(lambda w: w in self.workers).empty:
+                    self.workers.extend(new_workers)
+                else:
+                    raise WorkerManagementException
             else:
-                raise WorkerManagementException
-        except WorkerManagementException:
+                raise UnitTypeException
+        except UnitTypeException:
             print(f"Only workers can be added to a workers list: {nw.type_id for nw in new_workers}")
+            print()
+        except WorkerManagementException:
+            print(f"Some of the workers are already associated to the base: {nw.tag for nw in new_workers} | {w.tag for w in self.workers}")
             print()
 
     # Pop workers out of the base
@@ -63,7 +75,7 @@ class Base:
             return Units([], self._bot_object)
 
     # Delete workers from the base
-    # /!\ Only use these methods if the workers no longer exist
+    # /!\ Only use these methods if the workers no longer exist (destroyed)
     def remove_worker(self, worker: Unit):
         self.remove_workers(Units([worker], self._bot_object))
     def remove_workers(self, workers: Units):
@@ -73,5 +85,9 @@ class Base:
             else:
                 raise WorkerManagementException
         except WorkerManagementException:
-            print(f"Cannot delete workers that are not part of the base: {w.tag for w in workers}")
+            print(f"Cannot delete workers that are not associated to the base: {w.tag for w in workers}")
             print()
+
+    # TODO Place a pylon, prioritize ramp/choke
+    def build_additional_pylons(self, amount):
+        pass

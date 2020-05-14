@@ -8,7 +8,7 @@ from sc2.units import Units
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 
-from data.libs.exceptions.unit_management_exceptions import WorkerManagementException
+from sc2_protoss_manager.exceptions.unit_management_exceptions import WorkerManagementException
 
 class Proxy:
     def __init__(self, pylon: Unit, bot_object: BotAI):

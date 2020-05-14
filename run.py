@@ -26,4 +26,4 @@ if __name__ == "__main__":
     else:
         # Local game
         print("Starting local game...")
-        sc2.run_game(sc2.maps.get(maps[map]), [bot, Computer(races[computer_race], Difficulty.Easy)], realtime=False)
+        sc2.run_game(sc2.maps.get(maps[map]), [bot, Computer(races[computer_race], Difficulty.Easy)], realtime=True)
