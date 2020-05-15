@@ -16,13 +16,6 @@ from sc2.position import Point2
 
 import sc2_protoss_manager
 from sc2_protoss_manager.protoss_manager import ProtossManager
-# from sc2_protoss_manager.proxy_manager import ProxyManager
-# from sc2_protoss_manager.army_manager import ArmyManager
-
-# from sc2_protoss_manager.unit_type_categories import UnitTypeCategory
-base_type_id = UnitTypeId.NEXUS
-worker_type_id = UnitTypeId.PROBE
-army_type_ids = [UnitTypeId.ZEALOT, UnitTypeId.STALKER]
 
 DEBUG = True
 
