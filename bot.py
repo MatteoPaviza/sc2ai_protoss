@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, Generator, TYPE_CHECKING
 
 import sc2
-from sc2 import Race, Difficulty, BotAI, Result
+from sc2 import Race, BotAI, Result
 from sc2.player import Bot, Computer
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
@@ -28,7 +28,7 @@ class ProtossBot(BotAI):
 
     async def on_before_start(self):
         # Managers
-        self.manager: ProtossManager = ProtossManager([], self)
+        self.manager: ProtossManager = ProtossManager(self)
 
     async def on_start(self):
         if DEBUG:

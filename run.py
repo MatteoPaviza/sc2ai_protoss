@@ -1,20 +1,22 @@
-import sc2, sys, os
+import sys, os
 
-from __init__ import run_ladder_game
+import sc2
 from sc2 import Race, Difficulty
 from sc2.player import Bot, Computer
 
-# Load bot
+from __init__ import run_ladder_game
 from bot import ProtossBot
 
-maps = ['AcropolisLE', 'DiscoBloodbathLE', 'EphemeronLE', 'ThunderbirdLE', 'TritonLE', 'WintersGateLE', 'WorldofSleepersLE']
-races = [Race.Protoss, Race.Terran, Race.Zerg]
+MAPS = ['AcropolisLE', 'DiscoBloodbathLE', 'EphemeronLE', 'ThunderbirdLE', 'TritonLE', 'WintersGateLE', 'WorldofSleepersLE']
+RACES = [Race.Protoss, Race.Terran, Race.Zerg]
+COMPUTER_DIFFICULTIES = [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard, Difficulty.VeryHard]
 
 map = 0
 own_race = 0
 computer_race = 0
+computer_difficulty = 0
 
-bot = Bot(races[own_race], ProtossBot())
+bot = Bot(RACES[own_race], ProtossBot())
 
 # Start game
 if __name__ == "__main__":
@@ -26,4 +28,4 @@ if __name__ == "__main__":
     else:
         # Local game
         print("Starting local game...")
-        sc2.run_game(sc2.maps.get(maps[map]), [bot, Computer(races[computer_race], Difficulty.Easy)], realtime=True)
+        sc2.run_game(sc2.maps.get(MAPS[map]), [bot, Computer(RACES[computer_race], Difficulty.Easy)], realtime=True)

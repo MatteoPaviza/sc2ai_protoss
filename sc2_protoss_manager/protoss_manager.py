@@ -1,4 +1,8 @@
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, Generator, TYPE_CHECKING
+import cv2, math
+import numpy as np
+# import tensorflow as tf
+# from tensorflow import keras
 
 import sc2
 from sc2.position import Point2
@@ -7,6 +11,7 @@ from sc2.units import Units
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
+from sc2.ids.ability_id import AbilityId
 
 from .base import Base
 from .proxy import Proxy
@@ -22,12 +27,13 @@ SOLDIERS_IDS = [UnitTypeId.ZEALOT, UnitTypeId.STALKER, UnitTypeId.SENTRY, UnitTy
 
 class ProtossManager():
 
-    def __init__(self, early_guidance, bot_object: BotAI):
+    def __init__(self, bot_object: BotAI):
         # self.early_guidance = early_guidance
         self._bot_object = bot_object
         self.bases: List[Base] = [Base(bot_object.townhalls.first, bot_object)]
         self.proxies: List[Proxy] = []
         self.armies: List[Army] = []
+        self.map_size = bot_object.game_info.map_size
 
     def run(self, iteration):
         pass
@@ -72,14 +78,16 @@ class ProtossManager():
         pass
 
     def on_unit_destroyed(self, unit_tag: int):
-        # TODO Go through every unit list
-        pass
+        for base in self.bases:
+            if base.remove_worker(unit_tag):
+                return
 
     def on_building_construction_started(self, building: Unit):
         if building.type_id == NEXUS_ID:
             self.bases.append(Base(building, self._bot_object))
         elif building.type_id == PYLON_ID:
-            pass
+            closest_base = self._bases_sorted_by_distance_to(building)[0]
+            closest_base.add_pylon(building)
         elif building.type_id in TRAININGFACILITIES_IDS:
             pass
         elif building.type_id in RESEARCHFACILITIES_IDS:
@@ -109,4 +117,5 @@ class ProtossManager():
 
     # TODO Order bases to build pylons, prioritize outermost ramps/chokes
     def build_pylons(self, amount):
-        self.bases[0].build_pylons(1)
+        pass
+        # self.bases[0].build_pylons(1)

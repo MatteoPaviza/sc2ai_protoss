@@ -26,7 +26,10 @@ class Base:
 
     @property
     def is_complete(self) -> bool:
-        return self.nexus.is_ready
+        if bool(self.nexus):
+            return self.nexus.is_ready
+        else:
+            return False
 
     def __repr__(self):
         is_complete_str = "+" if self.is_complete else "~"
@@ -79,19 +82,21 @@ class Base:
             print()
             return Units([], self._bot_object)
 
+    # Returns wether or not a worker is associated to the base using its tag
+    def has_worker(self, worker_tag: int) -> bool:
+        for worker in self.workers:
+            if worker.tag == worker_tag:
+                return True
+        return False
+
     # Delete workers from the base
     # /!\ Only use these methods if the workers no longer exist (destroyed)
-    def remove_worker(self, worker: Unit):
-        self.remove_workers(Units([worker], self._bot_object))
-    def remove_workers(self, workers: Units):
-        try:
-            if workers.filter(lambda w: w not in self.workers).empty:
-                self.workers = self.workers.filter(lambda w: w not in workers)
-            else:
-                raise WorkerManagementException
-        except WorkerManagementException:
-            print(f"Cannot delete workers that are not associated to the base: {w.tag for w in workers}")
-            print()
+    def remove_worker(self, worker_tag: int):
+        for worker in self.workers:
+            if worker.tag == worker_tag:
+                self.workers.remove(worker)
+                return True
+        return False
 
     def train_worker(self):
         self.nexus.train(UnitTypeId.PROBE)
@@ -99,5 +104,5 @@ class Base:
     # TODO Place a pylon, prioritize ramp/choke
     def build_pylons(self, amount):
         worker = self.workers.first
-        worker.move(self.position.offset([4.5,4.5]), False)
-        # worker.gather(self.mineral_nodes.first, True)
+        worker.build(UnitTypeId.PYLON, self.position.offset([4.5,4.5]), False)
+        worker.gather(self.mineral_nodes.first, True)
